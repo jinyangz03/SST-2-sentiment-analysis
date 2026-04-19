@@ -1,7 +1,0 @@
-{
-  "distilbert": {
-    "test_acc": 0.49917627677100496,
-    "best_val_acc": 0.5091743119266054,
-    "total_train_time_sec": 177.46408700942993
-  }
-}

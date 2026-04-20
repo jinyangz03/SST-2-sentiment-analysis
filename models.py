@@ -77,9 +77,9 @@ class AlbertModel(nn.Module):
     def __init__(self, requires_grad=True):
         super(AlbertModel, self).__init__()
         self.albert = AlbertForSequenceClassification.from_pretrained(
-            "albert-base-v2", num_labels=2  # use base for speed; original used xxlarge
-        )
-        self.tokenizer = AutoTokenizer.from_pretrained("albert-base-v2", do_lower_case=True)
+    "textattack/albert-base-v2-SST-2", num_labels=2)
+        
+        self.tokenizer = AutoTokenizer.from_pretrained("textattack/albert-base-v2-SST-2", do_lower_case=True)
         self.requires_grad = requires_grad
         self.device = DEVICE
         for param in self.albert.parameters():

@@ -52,10 +52,9 @@ class BertModel(nn.Module):
 class RobertModel(nn.Module):
     def __init__(self, requires_grad=True):
         super(RobertModel, self).__init__()
-        self.bert = RobertaForSequenceClassification.from_pretrained(
-            "roberta-base", num_labels=2
+        self.bert = RobertaForSequenceClassification.from_pretrained("textattack/roberta-base-SST-2", num_labels=2)
         )
-        self.tokenizer = AutoTokenizer.from_pretrained("roberta-base")
+        self.tokenizer = AutoTokenizer.from_pretrained("textattack/roberta-base-SST-2")
         self.requires_grad = requires_grad
         self.device = DEVICE
         for param in self.bert.parameters():

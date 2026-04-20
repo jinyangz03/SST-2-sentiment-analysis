@@ -101,10 +101,9 @@ class AlbertModel(nn.Module):
 class XlnetModel(nn.Module):
     def __init__(self, requires_grad=True):
         super(XlnetModel, self).__init__()
-        self.xlnet = XLNetForSequenceClassification.from_pretrained(
-            "xlnet-base-cased", num_labels=2  # base for accessibility
-        )
-        self.tokenizer = AutoTokenizer.from_pretrained("xlnet-base-cased")
+        self.xlnet = XLNetForSequenceClassification.from_pretrained("textattack/xlnet-base-cased-SST-2", num_labels=2)
+        self.tokenizer = AutoTokenizer.from_pretrained("textattack/xlnet-base-cased-SST-2")
+
         self.requires_grad = requires_grad
         self.device = DEVICE
         for param in self.xlnet.parameters():

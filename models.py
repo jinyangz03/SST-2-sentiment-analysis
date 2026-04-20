@@ -133,11 +133,11 @@ class DistilBertModel(nn.Module):
     def __init__(self, requires_grad=True):
         super(DistilBertModel, self).__init__()
         self.distilbert = DistilBertForSequenceClassification.from_pretrained(
-            "distilbert-base-uncased", num_labels=2
-        )
+    "distilbert-base-uncased-finetuned-sst-2-english", num_labels=2)
+        
         self.tokenizer = AutoTokenizer.from_pretrained(
-            "distilbert-base-uncased", do_lower_case=True
-        )
+    "distilbert-base-uncased-finetuned-sst-2-english", do_lower_case=True)
+        
         self.requires_grad = requires_grad
         self.device = DEVICE
         for param in self.distilbert.parameters():

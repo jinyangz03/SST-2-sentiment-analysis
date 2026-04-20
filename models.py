@@ -53,7 +53,7 @@ class RobertModel(nn.Module):
     def __init__(self, requires_grad=True):
         super(RobertModel, self).__init__()
         self.bert = RobertaForSequenceClassification.from_pretrained("textattack/roberta-base-SST-2", num_labels=2)
-        )
+        
         self.tokenizer = AutoTokenizer.from_pretrained("textattack/roberta-base-SST-2")
         self.requires_grad = requires_grad
         self.device = DEVICE

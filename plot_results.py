@@ -7,18 +7,23 @@ from sklearn.metrics import confusion_matrix, f1_score, accuracy_score
 OUTPUT_DIR = "output"
 FIG_DIR = "figures"
 
+# create figure output folder if it does not exist
 os.makedirs(FIG_DIR, exist_ok=True)
 
+# models to evaluate
 model_names = ["bert", "roberta", "albert", "xlnet", "distilbert"]
 summary_rows = []
 f1_rows = []
 
 for model in model_names:
     metrics_path = os.path.join(OUTPUT_DIR, model, "metrics.json")
+
+    # skip model if result file is missing
     if not os.path.exists(metrics_path):
         print(f"Skip {model}: metrics.json not found")
         continue
 
+    # load saved training and test metrics
     with open(metrics_path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
@@ -30,7 +35,7 @@ for model in model_names:
     y_true = data["test_labels"]
     y_pred = data["test_preds"]
 
-    # 1) Accuracy curve
+    # 1) plot training and validation accuracy curve
     plt.figure(figsize=(8, 5))
     plt.plot(epochs, train_accs, marker="o", label="Train Accuracy")
     plt.plot(epochs, val_accs, marker="o", label="Validation Accuracy")
@@ -42,7 +47,7 @@ for model in model_names:
     plt.savefig(os.path.join(FIG_DIR, f"{model}_accuracy_curve.png"))
     plt.close()
 
-    # 2) Loss curve
+    # 2) plot training and validation loss curve
     plt.figure(figsize=(8, 5))
     plt.plot(epochs, train_losses, marker="o", label="Train Loss")
     plt.plot(epochs, val_losses, marker="o", label="Validation Loss")
@@ -54,7 +59,7 @@ for model in model_names:
     plt.savefig(os.path.join(FIG_DIR, f"{model}_loss_curve.png"))
     plt.close()
 
-    # 3) Confusion matrix
+    # 3) generate confusion matrix
     cm = confusion_matrix(y_true, y_pred)
     plt.figure(figsize=(6, 5))
     plt.imshow(cm)
@@ -64,6 +69,7 @@ for model in model_names:
     plt.xticks([0, 1], ["Negative", "Positive"])
     plt.yticks([0, 1], ["Negative", "Positive"])
 
+    # write each confusion matrix value on the figure
     for i in range(cm.shape[0]):
         for j in range(cm.shape[1]):
             plt.text(j, i, str(cm[i, j]), ha="center", va="center")
@@ -72,7 +78,7 @@ for model in model_names:
     plt.savefig(os.path.join(FIG_DIR, f"{model}_confusion_matrix.png"))
     plt.close()
 
-    # 4) F1 per class
+    # 4) compute F1 score for each class
     f1_neg = f1_score(y_true, y_pred, pos_label=0)
     f1_pos = f1_score(y_true, y_pred, pos_label=1)
 
@@ -82,26 +88,27 @@ for model in model_names:
         "positive": f1_pos,
     })
 
+    # save summary statistics for this model
     summary_rows.append({
-    "dataset": "SST-2",
-    "model": model,
-    "test_acc": accuracy_score(y_true, y_pred),
-    "val_acc": data["best_val_acc"],
-    "val_loss": min(data["valid_losses"]),
-    "train_time": data["total_train_time_sec"],
-    "epochs": len(data["epochs"]),
-    "num_classes": 2,
-    "f1_negative": f1_neg,
-    "f1_positive": f1_pos,
-    "split": "balanced"
-})
+        "dataset": "SST-2",
+        "model": model,
+        "test_acc": accuracy_score(y_true, y_pred),
+        "val_acc": data["best_val_acc"],
+        "val_loss": min(data["valid_losses"]),
+        "train_time": data["total_train_time_sec"],
+        "epochs": len(data["epochs"]),
+        "num_classes": 2,
+        "f1_negative": f1_neg,
+        "f1_positive": f1_pos,
+        "split": "balanced"
+    })
 
-# 5) Summary CSV
+# 5) save all model results into one summary CSV
 summary_df = pd.DataFrame(summary_rows)
 summary_csv_path = os.path.join(OUTPUT_DIR, "summary.csv")
 summary_df.to_csv(summary_csv_path, index=False)
 
-# 6) Test accuracy bar chart
+# 6) compare test accuracy across models
 if not summary_df.empty:
     plt.figure(figsize=(8, 5))
     plt.bar(summary_df["model"], summary_df["test_acc"])
@@ -112,7 +119,7 @@ if not summary_df.empty:
     plt.savefig(os.path.join(FIG_DIR, "test_accuracy_bar.png"))
     plt.close()
 
-    # 7) Accuracy vs training time
+    # 7) visualize trade-off between accuracy and training time
     plt.figure(figsize=(8, 5))
     plt.scatter(summary_df["train_time"], summary_df["test_acc"])
     for _, row in summary_df.iterrows():
@@ -124,7 +131,7 @@ if not summary_df.empty:
     plt.savefig(os.path.join(FIG_DIR, "accuracy_vs_training_time.png"))
     plt.close()
 
-# 8) F1 heatmap
+# 8) generate F1 score heatmap
 f1_df = pd.DataFrame(f1_rows)
 if not f1_df.empty:
     f1_df = f1_df.set_index("model")
@@ -135,6 +142,7 @@ if not f1_df.empty:
     plt.xticks([0, 1], ["Negative", "Positive"])
     plt.yticks(range(len(f1_df.index)), f1_df.index)
 
+    # write F1 values on the heatmap
     for i in range(f1_df.shape[0]):
         for j in range(f1_df.shape[1]):
             plt.text(j, i, f"{f1_df.iloc[i, j]:.4f}", ha="center", va="center")
